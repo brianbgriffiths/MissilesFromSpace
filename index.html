@@ -1,0 +1,421 @@
+<!DOCTYPE HTML>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:og="http://ogp.me/ns#"
+      xmlns:fb="https://www.facebook.com/2008/fbml">
+<head>
+<meta property="og:image" content="https://games.websiteoninternet.com/mfs/intro.png" />
+<meta charset="utf-8">
+<title>Missiles From Space</title>
+<script src="jquery.min.js"></script>
+<style type="text/css">
+#canvas {
+	background-color: #212E45; 
+	background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#000000), to(#212E45)); 
+	background: -webkit-linear-gradient(top, #000000, #212E45); 
+	background: -moz-linear-gradient(top, #000000, #212E45); 
+	background: -ms-linear-gradient(top, #000000, #212E45); 
+	background: -o-linear-gradient(top, #000000, #212E45);
+	cursor:crosshair;
+}
+.info {
+	border:solid 2px #FFFFFF;
+	border-radius:10px;
+	background-color:#818895;
+	font-size:16px;	
+	position:absolute;
+	text-align:center;
+}
+#levelinfo {
+	width:245px;
+	left:5px;
+	top:30px;
+}
+#upgrades {
+	width:730px;
+	height:400px;
+	left:260px;
+	top:30px;	
+}
+#powerups {
+	width:730px;
+	height:160px;
+	left:260px;
+	top:440px;	
+}
+#container {
+	position:relative;	
+}
+#money {
+	position:absolute;
+	right:5px;
+	top:5px;	
+}
+.buy {
+	display:inline-block;
+	text-align:center;
+	margin:5px;
+	width:160px;
+	position:relative;
+}
+.stat {
+	position:absolute;
+	bottom:0px;
+	right:0px;
+	color:#ffffff;
+	font-family:Tahoma, Geneva, sans-serif;
+	font-size:10px;
+	margin-right:2px;
+}
+.container-upgrade {
+	width:50px;
+	height:50px;
+	position:relative;	
+	margin:auto;
+	border-radius:5px;
+	border:solid 1px #F84724;
+	overflow:hidden;
+	cursor:pointer;
+}
+.container-upgrade:hover {
+	border:solid 1px #0367FD;
+}
+</style>
+</head>
+<body>
+<input id="pause" type="button" value="pause" onClick="javascript:pauseit();">
+<input id="unpause" type="button" value="unpause" onClick="javascript:unpause();" disabled="disabled">
+<br>
+<div id="container">
+	<canvas width="1000" height="625" id="canvas" onBlur="javascript:unpause();"></canvas> 
+	<div id="levelinfo" class="info"></div>
+    <div id="upgrades" class="info">Upgrades<br><span id="money">$10</span><br><br>
+    	<div style="text-align:left;">
+        	<div id="shotspeed" class="buy"><div class="container-upgrade"><img src="upgrade-shotspeed.png" onClick="javascript:upgrade('shotspeed',100);"><div id="stat-shotspeed" class="stat">1</div></div>Shot Speed<br>$100</div>
+            <div id="shotcount" class="buy"><div class="container-upgrade"><img src="upgrade-shotcount.png" onClick="javascript:upgrade('shotcount',50);"><div id="stat-shotcount" class="stat">1</div></div>Shot Count<br>$50</div>
+            <div id="shotrate" class="buy"><div class="container-upgrade"><img src="upgrade-shotrate.png" onClick="javascript:upgrade('shotrate',100);"><div id="stat-shotrate" class="stat">1</div></div>Firing Rate<br>$50</div>
+            <div id="boomsize" class="buy"><div class="container-upgrade"><img src="upgrade-boomsize.png" onClick="javascript:upgrade('boomsize',200);"><div id="stat-boomsize" class="stat">1</div></div>Explosion Size<br>$200</div>
+            <div id="boomgrow" class="buy"><div class="container-upgrade"><img src="upgrade-boomgrow.png" onClick="javascript:upgrade('boomgrow',100);"><div id="stat-boomgrow" class="stat">1</div></div>Explosion Speed<br>$50</div>
+            
+        </div>
+    </div>    
+    	<div id="powerups" class="info">Powerups
+        <div style="text-align:left;">
+        	<div id="autoshoot" class="buy"><div class="container-upgrade"><img src="powerup-autoshoot.png" onClick="javascript:powerup('autoshoot',500);"></div>Auto-Shoot<br>$500</div>
+            </div>
+        
+        </div>
+</div>
+<div style="width:1px;height:1px;overflow:hidden;"><img src="intro.png"></div>
+<script type="text/javascript"> 
+var canvas = document.getElementById('canvas'); 
+var c = canvas.getContext('2d'); 
+var icbm=[],shot=[],boom=[],mousex,mousey,ai=0,level=1,boomsize=40,shotspeed=10,shotcount=3,icbmspeed=1,icbmcount=5,icbmrate=.9850,shotdelay=20,icbmspawn=10,thisround=0,livecities=3,game,gt=0,city=[],goi=0,bgdraw=0,score=0,money=25,boomgrow=3,autoshoot=0;
+var dome=c.createLinearGradient(0,0,50,0);
+dome.addColorStop("0","#26C6C4");
+dome.addColorStop("0.5","#8EEAE9");
+dome.addColorStop("1.0","#26C6C4");
+var sky=c.createLinearGradient(0,0,0,625);
+sky.addColorStop("0","#000000");
+sky.addColorStop("1","#212E45");
+var citybg="#000000";
+var citybg2=new Image();
+citybg2.src='citybg.png';
+citybg2.onload=function() {
+	citybg=c.createPattern(citybg2,'repeat');
+}
+
+for (var d=1;d<=3;d++) {
+	var h=[],w=[],wsum=0,ci=0;
+	city[d]=[1];
+	while (wsum<90) {
+		w[ci]=Math.floor(Math.random()*5)+3;
+		h[ci]=Math.floor(Math.random()*25)+1;
+		wsum+=w[ci];
+		ci++;
+	}
+	for (var i=0;i<h.length;i++) {
+		city[d].push(w[i]);	
+		city[d].push(h[i]);		
+	}
+}
+function drawCity(d) {
+	c.strokeStyle="#8EEAE9";
+	c.lineWidth=3;
+	c.fillStyle=citybg;
+	c.beginPath();
+	c.arc(d*250,600,50,1*Math.PI,2*Math.PI);
+	c.stroke();
+	c.strokeStyle="#000000";
+	c.lineWidth=2;
+	c.beginPath();
+	var x=d*250-47;
+	var y=600;
+	c.moveTo(x,y);
+	for (var i=1;i<city[d].length;i+=2) {
+		y=600-city[d][i+1];
+		c.lineTo(x,y);
+		x=x+city[d][i];
+		c.lineTo(x,y);
+	}
+	c.lineTo(x,600);
+	c.fill();
+	c.stroke();
+	
+}
+function drawGun(d) {
+	c.fillRect((d-1)*900+25,550,50,50);
+	c.beginPath();
+	c.arc((d-1)*900+50,550,20,1*Math.PI,2*Math.PI);
+	c.fill();	
+}	
+function gameLoop() {
+	var x1,y1,x2,y2,x3,y3,x4,y4,m,b,pos,a;
+	if ((Math.random()>icbmrate && icbm.length < icbmcount && (thisround < icbmspawn || livecities==0))||thisround==0) {
+		var initx=Math.round((Math.random()*1000));
+		icbm.push([Math.floor(Math.random()*3)+1,initx,1,initx]);
+		thisround++;		
+	}
+	ai++;
+	if (autoshoot==1) {
+		if (shot.length<shotcount && !(thisround==icbmspawn && icbm.length==0) && ai>shotdelay) {
+				shoot(mousex,mousey);
+				ai=0;
+		}
+	}
+	var shots = shot.length;
+	while (shots--) {
+		if (shot[shots][0]==1) { x1=50; } else { x1=950; }
+		y1=535;
+		x2=shot[shots][1];
+		y2=shot[shots][2];
+		x3=Math.cos(shot[shots][4])*shot[shots][3];
+		y3=Math.sin(shot[shots][4])*shot[shots][3];
+		shot[shots][6]=x1+x3;
+		shot[shots][7]=y1-y3;
+		if ((shot[shots][0]==1 && x1+x3 > shot[shots][1] && y1-y3 < shot[shots][2])||(shot[shots][0]==2 && x1+x3 < shot[shots][1] && y1-y3 < shot[shots][2])) {
+			boom.push([shot[shots][1],shot[shots][2],1]);
+			shot.splice(shots,1);
+		} else {
+			shot[shots][3]+=shotspeed;	
+		}		
+	}
+	var icbms = icbm.length;
+	while (icbms--) {
+		y1=0;
+		x1=icbm[icbms][1];
+		x2=icbm[icbms][0]*250;
+		y2=550;
+		m=(y2-y1)/(x2-x1);
+		b=m*x1*-1;	
+		pos=(icbm[icbms][2]-b)/m;
+		icbm[icbms][2]+=icbmspeed;
+		icbm[icbms][3]=pos;
+		if (icbm[icbms][2]>549) {
+			city[icbm[icbms][0]][0]=0;
+			boom.push([icbm[icbms][3],icbm[icbms][2],1]);
+			icbm.splice(icbms,1);
+		} 	
+	}
+	var booms = boom.length;
+	while (booms--) {	
+		icbms = icbm.length;
+		while (icbms--) {
+			var d=Math.sqrt(Math.pow((icbm[icbms][3]-boom[booms][0]),2)+Math.pow((icbm[icbms][2]-boom[booms][1]),2));
+			if (d<boom[booms][2]) {
+				boom.push([icbm[icbms][3],icbm[icbms][2],1]);
+				icbm.splice(icbms,1);
+				if (livecities>0) {
+					score+=100;
+					money+=5;
+				}
+			}
+		}
+		if (boom[booms][2]>boomsize) {
+			boom.splice(i,1);	
+		} else {
+			boom[booms][2]+=boomgrow;
+		}
+	}
+	//c.fillStyle=sky;
+	//c.fillRect(0,0,1000,625);
+	c.clearRect(0,0,1000,625);
+	//c.globalAlpha=.5;
+	livecities=0;
+	for (var i=1;i<city.length;i++) {
+		if (city[i][0]==1) {
+			drawCity(i);
+			livecities++;
+		}
+	}
+	//c.globalAlpha=1;
+	c.strokeStyle="#808080";
+	c.fillStyle="#808080";
+	drawGun(1);
+	drawGun(2);	
+	c.strokeStyle="#ffffff";
+	c.fillStyle="#ffffff";
+	//c.globalAlpha=1;
+	c.lineWidth=1;	
+	for (var i=0;i<icbm.length;i++) {
+		c.beginPath();
+		c.moveTo(icbm[i][1],0);
+		c.lineTo(Math.round(icbm[i][3]),Math.round(icbm[i][2]));
+		c.stroke();	
+		c.fillRect(Math.round(icbm[i][3])-2,Math.round(icbm[i][2])-2,5,5);
+	}
+	c.fillStyle="#F84724";
+	c.strokeStyle="#F84724";
+	//c.globalAlpha=1;
+	c.lineWidth=1;
+	for (var i=0;i<shot.length;i++) {
+		if (shot[i][0]==1) { x1=50; } else { x1=950; }
+		y1=535;	
+		c.fillRect(shot[i][6],shot[i][7],5,5);
+		c.beginPath();
+		c.moveTo(x1,y1);
+		c.lineTo(shot[i][6]+2,shot[i][7]+2);
+		c.stroke();
+	}
+	c.globalAlpha=0.2;
+	c.fillStyle="#F84724";
+	for (var i=0;i<boom.length;i++) {
+		c.beginPath();
+		c.arc(boom[i][0],boom[i][1],boom[i][2],0,2*Math.PI);
+		c.fill();
+	}
+	c.globalAlpha=1;
+	
+	if (icbm.length==0 && icbmspawn==thisround && boom.length==0) {
+		icbmspawn++;
+		icbmspeed+=.05;
+		icbmcount++;
+		icbmrate-=.0025
+		level++;
+		thisround=0;
+		score+=(livecities*250);
+		money+=(livecities*25);
+		$("#levelinfo").html("Level "+level+"<br>ICBMs: "+icbmspawn+"<br>Speed: "+Math.round(icbmspeed*100)/100+"<br><input type=\"button\" value=\"start!\" onClick=\"javascript:unpause();\">");
+		pauseit();
+	} else if (livecities==0) {
+		c.font="100px Arial";
+		goi++;
+		if (goi>15) {
+			c.fillStyle="#FF0100";
+			goi=0;
+		} else if(goi>12) {
+			c.fillStyle="#F66D13";
+		} else if(goi>9) {
+			c.fillStyle="#F1B521";
+		} else if(goi>6) {
+			c.fillStyle="#FC2005";
+		} else if(goi>3) {
+			c.fillStyle="#F58217";
+		} else {
+			c.fillStyle="#F0C624";
+		}
+		c.fillText('GAME OVER',200,200);
+	}
+	c.fillStyle="#F84724";
+	c.font="10px Arial";
+	c.fillText("Level: "+level,10,620);
+	c.fillText("$"+money,800,620);
+	if (livecities>0) {	c.fillText("ICBMs: "+thisround+" / "+icbmspawn,100,620); }
+	c.font="20px Verdana";
+	c.fillStyle="#ff0000";
+	c.fillText(score,450,20);
+}
+function pauseit() {
+	clearInterval(game);
+	$("#pause").attr('disabled','disabled');
+	$("#unpause").attr('disabled',null);
+	$("#money").html("$"+money);
+	if (livecities>0) {
+		$("#upgrades").show();
+		$("#levelinfo").show();
+		$("#powerups").show();
+	}
+}
+function unpause() {	
+	game=setInterval(function(){gameLoop()},33);
+	$("#unpause").attr('disabled','disabled');
+	$("#pause").attr('disabled',null);
+	$("#upgrades").hide();
+	$("#levelinfo").hide();
+	$("#powerups").hide();
+}
+function upgrade(w,c) {
+	if (money>=c) {
+		var wi,text,cup;
+		money-=c;
+		$("#money").html("$"+money);
+		if (w=='shotspeed') {
+			shotspeed++;
+			text="Shot Speed";
+			wi=shotspeed-9;
+			cup=100;
+		} else if(w=='shotcount') {
+			shotcount++;
+			text="Shot Count";
+			wi=shotcount-2;
+			cup=50;
+		} else if (w=='boomsize') {
+			boomsize+=5;
+			text='Explosion Size';
+			wi=(boomsize-35)/5;
+			cup=200;
+		} else if (w=='boomgrow') {
+			boomgrow++;
+			text='Explosion Speed';
+			wi=boomgrow-2;
+			cup=50;
+		} else if (w=='shotrate') {
+			shotdelay-=1;
+			text='Firing Rate';
+			wi=21-shotdelay;
+			cup=50;
+		}
+		$("#"+w).html("<div class=\"container-upgrade\"><img src=\"upgrade-"+w+".png\" onClick=\"javascript:upgrade('"+w+"',"+(c+cup)+");\"><div id=\"stat-"+w+"\" class=\"stat\">"+(wi)+"</div></div>"+text+"<br>$"+(c+cup));
+	}
+}
+function powerup(w,c) {
+	if (money>=c) {
+		money-=c;
+	}
+}
+
+window.onload=function(){$("#levelinfo").html("Level "+level+"<br>ICBMs: "+icbmspawn+"<br>Speed: "+icbmspeed+"<br><input type=\"button\" value=\"start!\" onClick=\"javascript:unpause();\">");pauseit()};
+function shoot(x,y) {
+	if (x<500) { 
+			var a = -Math.atan2(y-535,x-50);
+			var an = a*(180/Math.PI);
+			if (an<90&&an>0)  {
+				shot.push([1,x,y,1,a,0,0,0]);
+			}
+		} else { 
+			var a = -Math.atan2(y-535,x-950);
+			var an = a*(180/Math.PI);
+			if (an>90&&an<180)  {
+				shot.push([2,x,y,1,a,0,0,0]);
+			}
+		}
+}
+$("#canvas").bind('click', function (e) {
+	if (shot.length<shotcount && !(thisround==icbmspawn && icbm.length==0) && ai>shotdelay) {
+	ai=0;
+	var canvas = $("#canvas").offset();
+	var cx=canvas.left;
+	var cy=canvas.top;
+	var x = e.clientX - cx;
+    var y = e.clientY - cy;
+	shoot(x,y);
+	}
+}).bind('mousemove',function (e) {
+	canvas = $("#canvas").offset();
+	cx=canvas.left;
+	cy=canvas.top;
+	mousex = e.clientX - cx;
+    mousey = e.clientY - cy;
+});
+</script>
+</body>
+</html>
