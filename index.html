@@ -3,7 +3,7 @@
       xmlns:og="http://ogp.me/ns#"
       xmlns:fb="https://www.facebook.com/2008/fbml">
 <head>
-<meta property="og:image" content="https://games.websiteoninternet.com/mfs/intro.png" />
+<meta property="og:image" content="https://games.websiteoninternet.com/mfs/images/intro.png" />
 <meta charset="utf-8">
 <title>Missiles From Space</title>
 <script src="jquery.min.js"></script>
@@ -90,22 +90,22 @@
 	<div id="levelinfo" class="info"></div>
     <div id="upgrades" class="info">Upgrades<br><span id="money">$10</span><br><br>
     	<div style="text-align:left;">
-        	<div id="shotspeed" class="buy"><div class="container-upgrade"><img src="upgrade-shotspeed.png" onClick="javascript:upgrade('shotspeed',100);"><div id="stat-shotspeed" class="stat">1</div></div>Shot Speed<br>$100</div>
-            <div id="shotcount" class="buy"><div class="container-upgrade"><img src="upgrade-shotcount.png" onClick="javascript:upgrade('shotcount',50);"><div id="stat-shotcount" class="stat">1</div></div>Shot Count<br>$50</div>
-            <div id="shotrate" class="buy"><div class="container-upgrade"><img src="upgrade-shotrate.png" onClick="javascript:upgrade('shotrate',100);"><div id="stat-shotrate" class="stat">1</div></div>Firing Rate<br>$50</div>
-            <div id="boomsize" class="buy"><div class="container-upgrade"><img src="upgrade-boomsize.png" onClick="javascript:upgrade('boomsize',200);"><div id="stat-boomsize" class="stat">1</div></div>Explosion Size<br>$200</div>
-            <div id="boomgrow" class="buy"><div class="container-upgrade"><img src="upgrade-boomgrow.png" onClick="javascript:upgrade('boomgrow',100);"><div id="stat-boomgrow" class="stat">1</div></div>Explosion Speed<br>$50</div>
+        	<div id="shotspeed" class="buy"><div class="container-upgrade"><img src="images/upgrade-shotspeed.png" onClick="javascript:upgrade('shotspeed',100);"><div id="stat-shotspeed" class="stat">1</div></div>Shot Speed<br>$100</div>
+            <div id="shotcount" class="buy"><div class="container-upgrade"><img src="images/upgrade-shotcount.png" onClick="javascript:upgrade('shotcount',50);"><div id="stat-shotcount" class="stat">1</div></div>Shot Count<br>$50</div>
+            <div id="shotrate" class="buy"><div class="container-upgrade"><img src="images/upgrade-shotrate.png" onClick="javascript:upgrade('shotrate',100);"><div id="stat-shotrate" class="stat">1</div></div>Firing Rate<br>$50</div>
+            <div id="boomsize" class="buy"><div class="container-upgrade"><img src="images/upgrade-boomsize.png" onClick="javascript:upgrade('boomsize',200);"><div id="stat-boomsize" class="stat">1</div></div>Explosion Size<br>$200</div>
+            <div id="boomgrow" class="buy"><div class="container-upgrade"><img src="images/upgrade-boomgrow.png" onClick="javascript:upgrade('boomgrow',100);"><div id="stat-boomgrow" class="stat">1</div></div>Explosion Speed<br>$50</div>
             
         </div>
     </div>    
     	<div id="powerups" class="info">Powerups
         <div style="text-align:left;">
-        	<div id="autoshoot" class="buy"><div class="container-upgrade"><img src="powerup-autoshoot.png" onClick="javascript:powerup('autoshoot',500);"></div>Auto-Shoot<br>$500</div>
+        	<div id="autoshoot" class="buy"><div class="container-upgrade"><img src="images/powerup-autoshoot.png" onClick="javascript:powerup('autoshoot',500);"></div>Auto-Shoot<br>$500</div>
             </div>
         
         </div>
 </div>
-<div style="width:1px;height:1px;overflow:hidden;"><img src="intro.png"></div>
+<div style="width:1px;height:1px;overflow:hidden;"><img src="images/intro.png"></div>
 <script type="text/javascript"> 
 var canvas = document.getElementById('canvas'); 
 var c = canvas.getContext('2d'); 
@@ -119,7 +119,7 @@ sky.addColorStop("0","#000000");
 sky.addColorStop("1","#212E45");
 var citybg="#000000";
 var citybg2=new Image();
-citybg2.src='citybg.png';
+citybg2.src='images/citybg.png';
 citybg2.onload=function() {
 	citybg=c.createPattern(citybg2,'repeat');
 }
@@ -374,7 +374,7 @@ function upgrade(w,c) {
 			wi=21-shotdelay;
 			cup=50;
 		}
-		$("#"+w).html("<div class=\"container-upgrade\"><img src=\"upgrade-"+w+".png\" onClick=\"javascript:upgrade('"+w+"',"+(c+cup)+");\"><div id=\"stat-"+w+"\" class=\"stat\">"+(wi)+"</div></div>"+text+"<br>$"+(c+cup));
+		$("#"+w).html("<div class=\"container-upgrade\"><img src=\"images/upgrade-"+w+".png\" onClick=\"javascript:upgrade('"+w+"',"+(c+cup)+");\"><div id=\"stat-"+w+"\" class=\"stat\">"+(wi)+"</div></div>"+text+"<br>$"+(c+cup));
 	}
 }
 function powerup(w,c) {
